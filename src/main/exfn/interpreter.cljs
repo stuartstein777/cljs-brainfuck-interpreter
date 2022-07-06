@@ -23,17 +23,19 @@
        (reduce reducer {:instr 0 :open [] :res {}})
        :res))
 
-(defn get-fwd-jump-target [{:keys [dp memory ip jmp-table]}]
+(defn get-jmp-target [{:keys [dp memory ip jmp-table]} direction]
   (let [byte-at-dp (memory dp 0)]
-    (if (zero? byte-at-dp)
+    (cond
+      (and (= direction :forward) (zero? byte-at-dp))
       (inc (jmp-table ip))
-      (inc ip))))     
 
-
-(defn get-bkwd-jump-target [{:keys [dp memory ip jmp-table]}]
-  (let [byte-at-dp (memory dp 0)]
-    (if (zero? byte-at-dp)
+      (and (= direction :forward) (not (zero? byte-at-dp)))
       (inc ip)
+      
+      (and (= direction :backward) (zero? byte-at-dp))
+      (inc ip)
+            
+      (and (= direction :backward) (not (zero? byte-at-dp)))
       (inc (jmp-table ip)))))
 
 (defn read-input [input]
@@ -80,10 +82,10 @@
                           (assoc-in [:memory (vm :dp)] (read-input (vm :input)))
                           (update :input rest)))
 
-            \[ (recur (let [new-ip (get-fwd-jump-target vm)]
+            \[ (recur (let [new-ip (get-jmp-target vm :forward)]
                         (assoc-in vm [:ip] new-ip)))
 
-            \] (recur (let [new-ip (get-bkwd-jump-target vm)]
+            \] (recur (let [new-ip (get-jmp-target vm :backward)]
                         (assoc-in vm [:ip] new-ip)))
 
             (recur (-> vm (update :ip inc)))))))))

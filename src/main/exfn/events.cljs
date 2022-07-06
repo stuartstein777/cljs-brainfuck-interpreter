@@ -6,7 +6,7 @@
  :initialize
  (fn [_ _]
    {:running? false
-    :source "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."}))
+    :source bf/hello-world}))
 
 ;; Handles the event where the user types into the source code textarea
 (rf/reg-event-db
