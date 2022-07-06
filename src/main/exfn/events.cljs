@@ -28,6 +28,7 @@
          input  (:input db)]
         (assoc db :output (bf/brain-fuck source input)))))
 
+;; Handle the load examples buttons clicks
 (rf/reg-event-db
  :load-example
  (fn [db [_ [example input]]]

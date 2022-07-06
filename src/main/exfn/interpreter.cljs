@@ -1,10 +1,7 @@
 (ns exfn.interpreter)
 
-(defn increment [n]
-  (mod (inc n) 256))
-
-(defn decrement [n]
-  (mod (dec n) 256))
+(defn inc-dec-mod [f n]
+  (mod (f n) 256))
 
 (defn reducer [{:keys [instr open] :as state} i]
   (cond
@@ -19,6 +16,7 @@
     :else    (update state :instr inc)))
 
 (defn build-jmp-table [code]
+  (prn "here!")
   (->> code
        (reduce reducer {:instr 0 :open [] :res {}})
        :res))
@@ -26,17 +24,13 @@
 (defn get-jmp-target [{:keys [dp memory ip jmp-table]} direction]
   (let [byte-at-dp (memory dp 0)]
     (cond
-      (and (= direction :forward) (zero? byte-at-dp))
+      (or (and (= direction :forward) (zero? byte-at-dp))
+          (and (= direction :backward) (not (zero? byte-at-dp))))
       (inc (jmp-table ip))
 
-      (and (= direction :forward) (not (zero? byte-at-dp)))
-      (inc ip)
-      
-      (and (= direction :backward) (zero? byte-at-dp))
-      (inc ip)
-            
-      (and (= direction :backward) (not (zero? byte-at-dp)))
-      (inc (jmp-table ip)))))
+      (or (and (= direction :forward) (not (zero? byte-at-dp)))
+          (and (= direction :backward) (zero? byte-at-dp)))
+      (inc ip))))
 
 (defn read-input [input]
   (if (empty? input)
@@ -45,12 +39,10 @@
 
 (defn brain-fuck [code input]
   (let [code (seq code)
-        jmp-table (build-jmp-table code)
         code-len (count code)]
     (loop [vm {:ip        0
                :input     (seq input)
-               :jmp-table jmp-table
-               :output    []
+               :jmp-table (build-jmp-table code)
                :dp        0
                :memory    {}}]
       (if (= (:ip vm) code-len)
@@ -59,11 +51,11 @@
           (condp = cur
             \+ (recur (-> vm
                           (update :ip inc)
-                          (update-in [:memory (vm :dp)] (fnil increment 0))))
+                          (update-in [:memory (vm :dp)] (fnil (partial inc-dec-mod inc) 0))))
 
             \- (recur (-> vm
                           (update :ip inc)
-                          (update-in [:memory (vm :dp)] (fnil decrement 0))))
+                          (update-in [:memory (vm :dp)] (fnil (partial inc-dec-mod dec) 0))))
 
             \> (recur (-> vm
                           (update :ip inc)
@@ -75,7 +67,7 @@
 
             \. (recur (-> vm
                           (update :ip inc)
-                          (update :output conj (.fromCharCode js/String (get-in vm [:memory (vm :dp)] 0)))))
+                          (update :output (fnil conj []) (.fromCharCode js/String (get-in vm [:memory (vm :dp)] 0)))))
 
             \, (recur (-> vm
                           (update :ip inc)
@@ -95,3 +87,10 @@
 (def sorter ">>,[>>,]<<[[<<]>>>>[<<[>+<<+>-]>>[>+<<<<[->]>[<]>>-]<<<[[-]>>[>+<-]>>[<<<+>>>-]]>>[[<+>-]>>]<]<<[>>+<<-]<<]>>>>[.>>]")
 (def bf-generator "+++++[>+++++++++<-],[[>--.++>+<<-]>+.->[<.>-]<<,]")
 (def reverse-input ">,[>,]<[.<]")
+
+(comment
+  (brain-fuck sorter "JFIDOSFINF")
+  (brain-fuck hello-world "")
+  (brain-fuck reverse-input "ABCDEF")
+  (brain-fuck fib "")
+  )
