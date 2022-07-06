@@ -1,0 +1,34 @@
+body{
+    background-color: gainsboro;
+}
+
+.code {
+    width: 100%;
+    height: 250px;
+}
+
+.input {
+    width: 100%;
+    height: 250px;
+}
+
+.output {
+    width: 100%;
+    height: 250px;
+}
+
+.header {
+    font-size: 2.0em;
+    font-weight: bolder;
+}
+
+.running-indicator{
+    margin-left: 10px;
+    color: #939393;
+    display: none;
+}
+
+.example-btn {
+    margin-top: 10px;
+    margin-right: 5px;
+}

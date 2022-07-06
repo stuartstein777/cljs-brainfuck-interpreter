@@ -1,0 +1,16 @@
+{
+  "name": "learn-reframe",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "react-flip-move": "^3.0.2",
+    "react-highlight.js": "1.0.7",
+    "shadow-cljs": "^2.11.22"
+  },
+  "dependencies": {
+    "create-react-class": "^15.6.3",
+    "highlight.js": "9.18.1",
+    "react": "17.0.1",
+    "react-dom": "17.0.1"
+  }
+}
